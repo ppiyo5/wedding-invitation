@@ -1,0 +1,1023 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="robots" content="noindex" />
+  <title>초대 링크 관리 — 추연학 ♡ 홍은미</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+  <style>
+/* OD-LAYOUT-PRIMITIVES v1 — structure only: display, flex/grid, overflow, wrapping, ratio, geometry.
+   Put this @layer first; product CSS outside the layer always wins. */
+@layer od-layout {
+  :where(.od-stack,.od-row,.od-row-top,.od-cluster,.od-grid,.od-field,.od-stat,.od-cell,.od-tile) > :where(*) { min-width: 0; }
+
+  /* containers */
+  .od-stack   { display: flex; flex-direction: column; gap: var(--od-gap, 8px); }
+  .od-row     { display: flex; align-items: center; gap: var(--od-gap, 8px); }
+  .od-row-top { display: flex; align-items: flex-start; gap: var(--od-gap, 8px); }
+  .od-cluster { display: flex; flex-wrap: wrap; align-items: center; gap: var(--od-gap, 8px); }
+  .od-fill    { flex: 1 1 0; min-width: 0; }
+  .od-fixed   { flex: none; }
+  .od-grid    { display: grid; gap: var(--od-gap, 12px); grid-template-columns: repeat(var(--od-cols, 3), minmax(0, 1fr)); }
+
+  /* stacked information: each piece is its own line — never sibling inline spans */
+  .od-stat, .od-field, .od-cell { display: grid; gap: var(--od-gap, 2px); }
+  :where(.od-stat,.od-field,.od-cell) > :where(*) { display: block; }
+  .od-tile { display: grid; grid-template-rows: auto 1fr; }
+  :where(.od-tile) > :where(*) { display: block; }
+
+  /* media keeps its intrinsic ratio by default; never a distorted or cropped
+     cover by accident. height:auto lets the ratio win over an <img height="…">
+     attribute. Cropping to a uniform box is an explicit opt-in: set --od-ratio
+     AND add .od-media-cover together (per the core rule, only where a crop is
+     deliberate — tile thumbs, decorative fills — never on full-frame content). */
+  .od-media { display: block; width: 100%; height: auto; aspect-ratio: var(--od-ratio, auto); }
+  .od-media-cover { object-fit: cover; }
+
+  /* functional inline SVG icons opt into bounded geometry; content SVGs keep their own */
+  .od-icon { display: inline-block; inline-size: var(--od-icon-size, 1em); block-size: var(--od-icon-size, 1em); flex: none; }
+
+  /* data text only — authored copy is rewritten to its budget instead */
+  .od-truncate { display: block; max-width: 100%; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+  .od-clamp-2, .od-clamp-3 { display: -webkit-box; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere; }
+  .od-clamp-2 { -webkit-line-clamp: 2; }
+  .od-clamp-3 { -webkit-line-clamp: 3; }
+  .od-lines-2 { min-height: calc(2 * 1.4em); }   /* block-level reservation for a shared baseline */
+  .od-nowrap  { white-space: nowrap; }           /* 数字+单位 · 价格+起 · 日期+星期 */
+  .od-keep    { word-break: keep-all; overflow-wrap: anywhere; } /* CJK labels break at spaces / <wbr> first */
+
+  /* screen skeleton (optional): bars take their own space, the middle scrolls — no padding guessed for chrome */
+  .od-screen { display: grid; grid-template-rows: auto minmax(0, 1fr) auto; height: 100%; }
+  .od-scroll { overflow-y: auto; overscroll-behavior: contain; min-height: 0; }
+
+  /* horizontal rail: the next item peeks at the edge; trailing room survives overflow */
+  .od-rail { display: flex; gap: var(--od-gap, 8px); overflow-x: auto; scroll-snap-type: x proximity; scrollbar-width: none;
+             padding-inline: var(--od-rail-pad, 16px); scroll-padding-inline: var(--od-rail-pad, 16px); }
+  .od-rail::-webkit-scrollbar { display: none; }
+  :where(.od-rail) > :where(*) { flex: none; scroll-snap-align: start; }
+  :where(.od-rail) > :where(:last-child) { margin-inline-end: var(--od-rail-pad, 16px); }
+
+  .od-spacer { flex: none; visibility: hidden; pointer-events: none; }
+  .od-touch  { min-width: 44px; min-height: 44px; }
+}
+/* /OD-LAYOUT-PRIMITIVES v1 */
+
+/* ───────── Invitation design tokens ───────── */
+:root {
+  --c-bg: #f8f7f6;
+  --c-surface: #ffffff;
+  --c-ink: #262322;
+  --c-muted: #66605d;
+  --c-line: #e7e3e1;
+  --c-field-line: #948c88;
+  /* Soft greige (muted mocha-taupe): a light, near-achromatic main colour —
+     the lightest value that still keeps 4.5:1 for white button text */
+  --c-accent: #7a706b;
+  --c-accent-strong: #5f5753;
+  --c-spring: #4d6a2f;
+  --c-spring-soft: #e8f0de;
+  --c-accent-ink: #ffffff;
+  --c-accent-soft: #f1eeec;
+  --c-sun: #a8433e;
+  --c-error: #b3261e;
+  --c-success: #2f6b4a;
+  --c-scrim: rgba(28, 25, 23, .48);
+
+  --f-display: "Gowun Batang", "Nanum Myeongjo", serif;
+  --f-body: "Pretendard", "Apple SD Gothic Neo", system-ui, sans-serif;
+
+  --t-xs: 12px;
+  --t-sm: 14px;
+  --t-md: 16px;
+  --t-lg: 20px;
+  --t-xl: 24px;
+  --t-2xl: 32px;
+
+  --s-1: 4px;
+  --s-2: 8px;
+  --s-3: 12px;
+  --s-4: 16px;
+  --s-5: 24px;
+  --s-6: 32px;
+  --s-7: 48px;
+  --s-8: 64px;
+  --s-9: 96px;
+
+  --r-sm: 8px;
+  --r-md: 12px;
+  --r-lg: 20px;
+
+  --d-fast: 160ms;
+  --d-base: 240ms;
+  --d-slow: 360ms;
+  --e-out: cubic-bezier(.2, .7, .2, 1);
+  --e-in: cubic-bezier(.5, 0, .75, 0);
+  --d-reveal: 400ms;
+  --d-aos: 600ms;
+  --e-aos: ease;
+  --aos-distance: 50px;
+
+  --c-intro-bg: #2b2826;
+  --c-intro-ink: #f8f7f6;
+  --c-intro-muted: #cfc8c4;
+}
+
+.inv {
+  font-family: var(--f-body);
+  font-size: var(--t-md);
+  line-height: 1.7;
+  color: var(--c-ink);
+  background: var(--c-bg);
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+  -webkit-font-smoothing: antialiased;
+}
+.inv h1, .inv h2, .inv h3, .inv p { margin: 0; }
+.inv button { font: inherit; color: inherit; }
+.inv a { color: inherit; }
+.inv :focus-visible,
+.overlay :focus-visible { outline: 2px solid var(--c-accent); outline-offset: 2px; border-radius: var(--r-sm); }
+.icon-sprite { position: absolute; width: 0; height: 0; overflow: hidden; }
+.od-icon { fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+
+.section { padding: var(--s-8) var(--s-5); }
+.section + .section { border-top: 1px solid var(--c-line); }
+.section--tint { background: var(--c-surface); }
+.eyebrow {
+  display: block;
+  font-size: var(--t-xs);
+  font-weight: 600;
+  letter-spacing: .24em;
+  color: var(--c-accent);
+  text-align: center;
+}
+.section-title {
+  margin-top: var(--s-2) !important;
+  font-family: var(--f-display);
+  font-size: var(--t-xl);
+  font-weight: 700;
+  line-height: 1.4;
+  text-align: center;
+}
+.section-lead { margin-top: var(--s-3) !important; color: var(--c-muted); text-align: center; font-size: var(--t-sm); }
+.section-body { margin-top: var(--s-6); }
+
+/* buttons */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: var(--s-2);
+  min-height: 48px; padding: 0 var(--s-5);
+  border-radius: var(--r-md); border: 1px solid var(--c-line);
+  background: var(--c-surface); font-size: var(--t-md); font-weight: 600;
+  cursor: pointer; text-decoration: none;
+  transition: background-color var(--d-fast) var(--e-out), border-color var(--d-fast) var(--e-out);
+}
+.btn--primary { background: var(--c-accent); border-color: var(--c-accent); color: var(--c-accent-ink) !important; }
+.btn--block { width: 100%; }
+.btn--sm { min-height: 44px; padding: 0 var(--s-4); font-size: var(--t-sm); }
+.btn[disabled] { opacity: .55; cursor: not-allowed; }
+@media (hover: hover) {
+  .btn:hover { border-color: var(--c-accent); background: var(--c-accent-soft); }
+  .btn--primary:hover { background: var(--c-accent-strong); border-color: var(--c-accent-strong); }
+}
+
+/* cover */
+.cover { padding: var(--s-6) var(--s-5) var(--s-8); text-align: center; }
+.cover-date {
+  font-family: var(--f-display);
+  font-size: var(--t-lg);
+  letter-spacing: .12em;
+}
+.cover-day { font-size: var(--t-xs); letter-spacing: .32em; color: var(--c-muted); font-weight: 600; }
+.cover-photo { margin: var(--s-5) 0 0; border-radius: var(--r-sm); overflow: hidden; }
+.cover-names {
+  margin-top: var(--s-6) !important;
+  font-family: var(--f-display);
+  font-size: var(--t-2xl);
+  font-weight: 700;
+  line-height: 1.3;
+  display: flex; justify-content: center; align-items: center; gap: var(--s-3);
+}
+.cover-names .amp { font-size: var(--t-lg); color: var(--c-accent); font-weight: 400; }
+.cover-meta { margin-top: var(--s-4); color: var(--c-muted); }
+.cover-meta > span { display: block; }
+
+/* invitation */
+.poem { font-family: var(--f-display); font-size: 17px; line-height: 2; text-align: center; }
+.poem + .poem { margin-top: var(--s-5) !important; }
+.parents { margin-top: var(--s-7); display: grid; gap: var(--s-3); justify-items: center; }
+.parent-line { display: flex; align-items: baseline; justify-content: center; gap: var(--s-2); flex-wrap: wrap; }
+.parent-line .who { font-size: var(--t-lg); font-family: var(--f-display); font-weight: 700; }
+.parent-line .rel { font-size: var(--t-sm); color: var(--c-muted); }
+.deceased { font-size: var(--t-xs); }
+.contact-cta { margin-top: var(--s-6); display: flex; justify-content: center; }
+
+/* calendar */
+.cal { background: var(--c-surface); border: 1px solid var(--c-line); border-radius: var(--r-lg); padding: var(--s-5) var(--s-4); }
+.cal-head { text-align: center; font-family: var(--f-display); font-size: var(--t-lg); font-weight: 700; }
+.cal-grid { margin-top: var(--s-4); --od-cols: 7; --od-gap: 4px; text-align: center; font-size: var(--t-sm); }
+.cal-grid .dow { color: var(--c-muted); font-size: var(--t-xs); font-weight: 600; padding-bottom: var(--s-2); }
+.cal-grid .day { display: grid; place-items: center; height: 40px; border-radius: 50%; font-variant-numeric: tabular-nums; }
+.cal-grid .sun { color: var(--c-sun); }
+.cal-grid .is-wedding { background: var(--c-accent); color: var(--c-accent-ink); font-weight: 700; aspect-ratio: 1; height: auto; width: 40px; justify-self: center; }
+.dday { margin-top: var(--s-6); --od-cols: 4; --od-gap: var(--s-2); }
+.dday .od-stat { background: var(--c-surface); border: 1px solid var(--c-line); border-radius: var(--r-md); padding: var(--s-3) 0; text-align: center; }
+.dday .num { font-size: clamp(22px, 6.4vw, 26px); font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; line-height: 1.2; }
+.dday .cap { font-size: var(--t-xs); color: var(--c-muted); }
+.dday-copy { margin-top: var(--s-4); text-align: center; font-size: var(--t-sm); color: var(--c-muted); }
+.dday-copy strong { color: var(--c-accent); }
+
+/* gallery */
+.gallery { --od-cols: 3; --od-gap: 4px; }
+.gallery button { padding: 0; border: 0; background: var(--c-line); cursor: zoom-in; border-radius: 4px; overflow: hidden; display: block; }
+.gallery img { transition: transform var(--d-base) var(--e-out); }
+@media (hover: hover) { .gallery button:hover img { transform: scale(1.03); } }
+.gallery-hint { margin-top: var(--s-3) !important; text-align: center; font-size: var(--t-xs); color: var(--c-muted); }
+
+/* location */
+.venue { text-align: center; }
+.venue-name { font-family: var(--f-display); font-size: var(--t-lg); font-weight: 700; }
+.venue-addr { color: var(--c-muted); font-size: var(--t-sm); }
+.venue-tel { font-size: var(--t-sm); color: var(--c-muted); }
+.map { margin-top: var(--s-5); border: 1px solid var(--c-line); border-radius: var(--r-md); overflow: hidden; background: #eef1ef; position: relative; }
+.map svg { display: block; width: 100%; height: auto; }
+.map-note { position: absolute; top: var(--s-2); left: var(--s-2); font-size: var(--t-xs); background: rgba(255,255,255,.92); padding: 2px var(--s-2); border-radius: 4px; color: var(--c-muted); }
+.map-actions { margin-top: var(--s-3); --od-cols: 3; --od-gap: var(--s-2); }
+.map-actions .btn { padding: 0 var(--s-2); font-size: var(--t-sm); }
+.addr-copy { margin-top: var(--s-2); }
+.transit { margin-top: var(--s-6); display: grid; gap: var(--s-5); }
+.transit-item { --od-gap: var(--s-3); }
+.transit-icon { --od-icon-size: 20px; width: 40px; height: 40px; border-radius: 50%; background: var(--c-accent-soft); color: var(--c-accent); display: grid; place-items: center; }
+.transit-item h3 { font-size: var(--t-md); font-weight: 700; line-height: 1.5; }
+.transit-item p { font-size: var(--t-sm); color: var(--c-muted); line-height: 1.7; }
+
+/* accounts */
+.acc-group { border: 1px solid var(--c-line); border-radius: var(--r-md); background: var(--c-surface); overflow: hidden; }
+.acc-group + .acc-group { margin-top: var(--s-3); }
+.acc-toggle {
+  width: 100%; min-height: 56px; padding: 0 var(--s-4);
+  border: 0; background: transparent; cursor: pointer;
+  display: flex; align-items: center; justify-content: space-between; gap: var(--s-3);
+  font-weight: 600; text-align: left;
+}
+.acc-toggle .chev { --od-icon-size: 20px; color: var(--c-muted); transition: transform var(--d-base) var(--e-out); }
+.acc-toggle[aria-expanded="true"] .chev { transform: rotate(180deg); }
+.acc-panel { border-top: 1px solid var(--c-line); }
+.acc-panel[hidden] { display: none; }
+.acc-row { padding: var(--s-3) var(--s-4); --od-gap: var(--s-3); }
+.acc-row + .acc-row { border-top: 1px dashed var(--c-line); }
+.acc-row .holder { font-size: var(--t-sm); color: var(--c-muted); }
+.acc-row .number { font-size: var(--t-md); font-weight: 600; font-variant-numeric: tabular-nums; }
+
+/* rsvp */
+.rsvp-card { background: var(--c-surface); border: 1px solid var(--c-line); border-radius: var(--r-lg); padding: var(--s-5); text-align: center; }
+.rsvp-card p { color: var(--c-muted); font-size: var(--t-sm); }
+.rsvp-card .btn { margin-top: var(--s-5); }
+.rsvp-status { margin-top: var(--s-3) !important; color: var(--c-success) !important; font-weight: 600; }
+.rsvp-status[hidden] { display: none; }
+
+/* guestbook */
+.gb-form { display: grid; gap: var(--s-3); }
+.gb-list { margin: var(--s-5) 0 0; padding: 0; list-style: none; display: grid; gap: var(--s-3); }
+.gb-item { background: var(--c-surface); border: 1px solid var(--c-line); border-radius: var(--r-md); padding: var(--s-4); }
+.gb-head { display: flex; justify-content: space-between; align-items: baseline; gap: var(--s-3); }
+.gb-name { font-weight: 700; font-size: var(--t-sm); }
+.gb-date { font-size: var(--t-xs); color: var(--c-muted); white-space: nowrap; }
+.gb-msg { margin-top: var(--s-1) !important; font-size: var(--t-sm); white-space: pre-wrap; }
+.gb-empty { margin-top: var(--s-5) !important; text-align: center; color: var(--c-muted); font-size: var(--t-sm); padding: var(--s-6) var(--s-4); border: 1px dashed var(--c-line); border-radius: var(--r-md); }
+.gb-empty[hidden] { display: none; }
+.gb-more { margin-top: var(--s-3); }
+.gb-more[hidden] { display: none; }
+
+/* forms */
+.field { --od-gap: var(--s-1); text-align: left; }
+.field label, .field legend, .field .label { font-size: var(--t-sm); font-weight: 600; }
+.req { color: var(--c-error); margin-left: 2px; }
+.input, .textarea {
+  width: 100%; min-height: 48px; padding: var(--s-3);
+  border: 1px solid var(--c-field-line); border-radius: var(--r-sm);
+  background: var(--c-surface); font: inherit; font-size: var(--t-md); color: var(--c-ink);
+  transition: border-color var(--d-fast) var(--e-out);
+}
+.textarea { min-height: 96px; resize: vertical; line-height: 1.6; }
+.input:focus, .textarea:focus { outline: none; border-color: var(--c-accent); box-shadow: 0 0 0 3px var(--c-accent-soft); }
+.field.is-invalid .input, .field.is-invalid .textarea { border-color: var(--c-error); }
+.field-error { font-size: var(--t-xs); color: var(--c-error); display: flex !important; gap: var(--s-1); align-items: center; }
+.field-error[hidden] { display: none !important; }
+.field-error .od-icon { --od-icon-size: 14px; }
+.field-help { font-size: var(--t-xs); color: var(--c-muted); }
+fieldset.field { border: 0; margin: 0; padding: 0; min-width: 0; }
+fieldset.field legend { padding: 0; margin-bottom: var(--s-1); }
+.seg { display: grid; grid-template-columns: repeat(var(--seg-cols, 2), minmax(0, 1fr)); gap: var(--s-2); }
+.seg input { position: absolute; opacity: 0; pointer-events: none; }
+.seg label {
+  display: flex; align-items: center; justify-content: center; min-height: 48px;
+  border: 1px solid var(--c-field-line); border-radius: var(--r-sm); cursor: pointer;
+  font-weight: 500; font-size: var(--t-sm); background: var(--c-surface);
+  transition: background-color var(--d-fast) var(--e-out), border-color var(--d-fast) var(--e-out);
+}
+.seg input:checked + label { background: var(--c-accent); border-color: var(--c-accent); color: var(--c-accent-ink); font-weight: 700; }
+.seg input:focus-visible + label { outline: 2px solid var(--c-accent); outline-offset: 2px; }
+.stepper { display: flex; align-items: center; gap: var(--s-2); }
+.stepper button { width: 48px; height: 48px; border-radius: var(--r-sm); border: 1px solid var(--c-field-line); background: var(--c-surface); cursor: pointer; display: grid; place-items: center; }
+.stepper button[disabled] { opacity: .4; cursor: not-allowed; }
+.stepper output { min-width: 64px; text-align: center; font-weight: 700; font-size: var(--t-lg); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.form-summary { border: 1px solid var(--c-error); background: #fcefee; color: var(--c-error); border-radius: var(--r-sm); padding: var(--s-3) var(--s-4); font-size: var(--t-sm); }
+.form-summary[hidden] { display: none; }
+.form-summary ul { margin: var(--s-1) 0 0; padding-left: var(--s-4); }
+.form-summary a { color: inherit; }
+
+/* share & closing */
+.closing { text-align: center; }
+.closing figure { margin: 0 0 var(--s-6); border-radius: var(--r-sm); overflow: hidden; }
+.closing p { font-family: var(--f-display); font-size: 17px; line-height: 1.9; }
+.share-row { margin-top: var(--s-6); --od-cols: 2; --od-gap: var(--s-2); }
+.footer { padding: var(--s-6) var(--s-5) var(--s-7); text-align: center; font-size: var(--t-xs); color: var(--c-muted); }
+
+/* scroll fade-up (set up by aos.js) — same timing as the reference invitation:
+   600ms (slowed from the reference's 400ms), ease, rising 50px, each block on its own */
+/* same blocks as AOS_SELECTOR in aos.js — hidden from first paint so nothing flashes */
+.cover > *,
+.reveal > :not(.section-body),
+.reveal > .section-body > * {
+  opacity: 0;
+  transform: translate3d(0, var(--aos-distance), 0);
+  transition: opacity var(--d-aos) var(--e-aos), transform var(--d-aos) var(--e-aos);
+}
+[data-aos-in] { opacity: 1 !important; transform: none !important; }
+/* after its one entrance, a block keeps no transform (so it can't drift or re-animate) */
+[data-aos-done] { transition: none !important; }
+
+/* ───────── Overlays (mounted inside the phone screen) ───────── */
+.overlay { position: absolute; inset: 0; z-index: 40; font-family: var(--f-body); color: var(--c-ink); word-break: keep-all; }
+.overlay[hidden] { display: none; }
+.scrim { position: absolute; inset: 0; background: var(--c-scrim); opacity: 0; transition: opacity var(--d-base) var(--e-out); }
+.sheet {
+  position: absolute; left: 0; right: 0; bottom: 0;
+  max-height: calc(100% - var(--phone-safe-top) - 24px);
+  display: grid; grid-template-rows: auto minmax(0, 1fr) auto;
+  background: var(--c-surface); border-radius: var(--r-lg) var(--r-lg) 0 0;
+  transform: translateY(100%); transition: transform var(--d-slow) var(--e-out);
+  box-shadow: 0 -8px 32px rgba(0,0,0,.12);
+}
+.overlay.is-open .scrim { opacity: 1; }
+.overlay.is-open .sheet { transform: none; }
+.overlay.is-closing .scrim { opacity: 0; transition-duration: var(--d-fast); transition-timing-function: var(--e-in); }
+.overlay.is-closing .sheet { transform: translateY(100%); transition-duration: var(--d-base); transition-timing-function: var(--e-in); }
+.sheet-head { display: flex; align-items: center; justify-content: space-between; gap: var(--s-3); padding: var(--s-3) var(--s-3) var(--s-2) var(--s-5); }
+.sheet-head::before { content: ""; position: absolute; top: 8px; left: 50%; width: 36px; height: 4px; margin-left: -18px; border-radius: 99px; background: var(--c-line); }
+.sheet-title { font-family: var(--f-display); font-size: var(--t-lg); font-weight: 700; margin: var(--s-2) 0 0; }
+.icon-btn { width: 44px; height: 44px; display: grid; place-items: center; border: 0; background: transparent; border-radius: 50%; cursor: pointer; color: var(--c-ink); --od-icon-size: 22px; }
+@media (hover: hover) { .icon-btn:hover { background: var(--c-accent-soft); } }
+.sheet-body { overflow-y: auto; overscroll-behavior: contain; padding: var(--s-2) var(--s-5) var(--s-5); }
+.sheet-foot { padding: var(--s-3) var(--s-5) calc(var(--phone-safe-bottom) + var(--s-2)); border-top: 1px solid var(--c-line); background: var(--c-surface); }
+.sheet-foot[hidden] { display: none; }
+
+.contact-group + .contact-group { margin-top: var(--s-5); }
+.contact-group h3 { font-size: var(--t-xs); letter-spacing: .16em; color: var(--c-accent); font-weight: 700; margin: 0 0 var(--s-2); }
+.contact-row { padding: var(--s-2) 0; --od-gap: var(--s-2); border-bottom: 1px solid var(--c-line); }
+.contact-row .rel { font-size: var(--t-xs); color: var(--c-muted); }
+.contact-row .name { font-weight: 600; }
+.round-btn { width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--c-line); display: grid; place-items: center; color: var(--c-accent); --od-icon-size: 20px; text-decoration: none; }
+@media (hover: hover) { .round-btn:hover { background: var(--c-accent-soft); } }
+
+.rsvp-form { display: grid; gap: var(--s-5); }
+.rsvp-done { text-align: center; padding: var(--s-6) 0; }
+.rsvp-done .ok { --od-icon-size: 32px; width: 64px; height: 64px; margin: 0 auto var(--s-4); border-radius: 50%; background: var(--c-accent-soft); color: var(--c-success); display: grid; place-items: center; }
+.rsvp-done h3 { font-family: var(--f-display); font-size: var(--t-lg); margin: 0; }
+.rsvp-done p { margin: var(--s-2) 0 0; color: var(--c-muted); font-size: var(--t-sm); }
+.spinner { width: 18px; height: 18px; border-radius: 50%; border: 2px solid rgba(255,255,255,.4); border-top-color: #fff; animation: spin 800ms linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* lightbox */
+.lightbox { background: #0e1110; color: #fff; display: grid; grid-template-rows: auto minmax(0, 1fr) auto; padding-top: var(--phone-safe-top); padding-bottom: calc(var(--phone-safe-bottom) + var(--s-2)); opacity: 0; transition: opacity var(--d-base) var(--e-out); }
+.lightbox.is-open { opacity: 1; }
+.lightbox.is-closing { opacity: 0; transition-duration: var(--d-fast); transition-timing-function: var(--e-in); }
+.lb-bar { display: flex; justify-content: space-between; align-items: center; padding: 0 var(--s-2) 0 var(--s-5); }
+.lb-count { font-size: var(--t-sm); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.lightbox .icon-btn { color: #fff; }
+@media (hover: hover) { .lightbox .icon-btn:hover { background: rgba(255,255,255,.14); } }
+.lb-stage { display: grid; place-items: center; min-height: 0; padding: var(--s-2) 0; touch-action: pan-y; }
+.lb-stage img { max-width: 100%; max-height: 100%; width: auto; height: auto; object-fit: contain; display: block; }
+.lb-nav { display: flex; justify-content: center; gap: var(--s-6); }
+.lb-nav .icon-btn { border: 1px solid rgba(255,255,255,.3); }
+
+/* toast */
+.toast {
+  position: absolute; z-index: 50; left: 50%; bottom: calc(var(--phone-safe-bottom) + var(--s-8));
+  transform: translate(-50%, 12px); opacity: 0;
+  max-width: calc(100% - 48px); width: max-content;
+  background: var(--c-ink); color: #fff; font-family: var(--f-body); font-size: var(--t-sm);
+  padding: var(--s-3) var(--s-4); border-radius: var(--r-md);
+  display: flex; align-items: center; gap: var(--s-2); pointer-events: none;
+  transition: opacity var(--d-base) var(--e-out), transform var(--d-base) var(--e-out);
+  word-break: keep-all;
+}
+.toast .od-icon { --od-icon-size: 18px; color: #9fd0b3; }
+.toast.is-shown { opacity: 1; transform: translate(-50%, 0); }
+
+@media (prefers-reduced-motion: reduce) {
+  .cover > *, .reveal > :not(.section-body), .reveal > .section-body > * { opacity: 1; transform: none; transition: none; }
+  .sheet, .scrim, .lightbox, .toast, .gallery img, .acc-toggle .chev { transition: none !important; }
+  .spinner { animation-duration: 2s; }
+}
+
+/* ───────── Floating controls: BGM + petals ───────── */
+.float-controls {
+  position: absolute; z-index: 30;
+  top: calc(var(--phone-safe-top) + var(--s-2)); right: var(--s-3);
+  display: flex; flex-direction: column; gap: var(--s-2);
+}
+.float-btn {
+  width: 44px; height: 44px; display: grid; place-items: center;
+  border-radius: 50%; border: 1px solid var(--c-line);
+  background: rgba(255, 255, 255, .94); color: var(--c-muted);
+  box-shadow: 0 4px 12px rgba(18, 22, 20, .12);
+  cursor: pointer; --od-icon-size: 20px;
+  transition: background-color var(--d-fast) var(--e-out), color var(--d-fast) var(--e-out), border-color var(--d-fast) var(--e-out);
+}
+.float-btn[aria-pressed="true"] { background: var(--c-accent); border-color: var(--c-accent); color: var(--c-accent-ink); }
+.float-btn[aria-busy="true"] { cursor: progress; }
+.float-btn:focus-visible { outline: 2px solid var(--c-accent); outline-offset: 2px; }
+@media (hover: hover) {
+  .float-btn:hover { border-color: var(--c-accent); color: var(--c-accent); }
+  .float-btn[aria-pressed="true"]:hover { background: var(--c-accent-strong); color: var(--c-accent-ink); }
+}
+.eq { display: flex; align-items: flex-end; gap: 2px; height: 14px; }
+.eq span { display: block; width: 3px; height: 100%; border-radius: 1px; background: currentColor; transform-origin: bottom; animation: eq 900ms ease-in-out infinite alternate; }
+.eq span:nth-child(2) { animation-delay: -300ms; }
+.eq span:nth-child(3) { animation-delay: -600ms; }
+@keyframes eq { from { transform: scaleY(.3); } to { transform: scaleY(1); } }
+
+.petals { position: absolute; inset: 0; z-index: 25; width: 100%; height: 100%; pointer-events: none; }
+
+.credit { margin-top: var(--s-2) !important; font-size: var(--t-xs); color: var(--c-muted); line-height: 1.6; }
+
+@media (prefers-reduced-motion: reduce) {
+  .eq span { animation: none; }
+  .float-btn { transition: none; }
+}
+
+.closing .section-title { margin-top: 0 !important; }
+
+/* ───────── Guest name ───────── */
+.guest-name { color: var(--c-accent); }
+
+/* ───────── Screen-reader only ───────── */
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+
+/* ───────── Intro cover (typed before the invitation opens) ───────── */
+.phone-screen.is-dark-overlay .status-bar { background: none; color: #fff; }
+.intro {
+  position: absolute; inset: 0; z-index: 14;
+  display: grid; grid-template-rows: minmax(0, 1fr) auto;
+  padding: calc(var(--phone-safe-top) + var(--s-6)) var(--s-6) calc(var(--phone-safe-bottom) + var(--s-5));
+  background: var(--c-intro-bg); color: var(--c-intro-ink);
+  font-family: var(--f-body); word-break: keep-all; cursor: pointer;
+  transition: opacity 280ms var(--e-in);
+}
+.intro:focus { outline: none; }
+.intro.is-leaving { opacity: 0; pointer-events: none; }
+.intro-body { display: grid; align-content: center; gap: var(--s-8); }
+.intro-lines { display: grid; gap: var(--s-2); }
+.intro-line { margin: 0; font-family: var(--f-display); font-size: 22px; line-height: 1.6; min-height: 1.6em; }
+.intro-caret {
+  display: inline-block; width: 2px; height: 1.1em; margin-left: 2px;
+  vertical-align: -0.15em; background: var(--c-intro-ink);
+  animation: caret 1s steps(1) infinite;
+}
+@keyframes caret { 50% { opacity: 0; } }
+.intro-sign { display: grid; gap: var(--s-2); opacity: 0; transform: translateY(16px); transition: opacity var(--d-reveal) var(--e-out), transform var(--d-reveal) var(--e-out); }
+.intro-sign.is-in { opacity: 1; transform: none; }
+.intro-names { margin: 0; font-family: var(--f-display); font-size: 28px; font-weight: 700; line-height: 1.3; }
+.intro-names .amp { font-size: var(--t-md); font-weight: 400; color: var(--c-intro-muted); margin: 0 var(--s-1); }
+.intro-date { margin: 0; font-size: var(--t-sm); letter-spacing: .3em; color: var(--c-intro-muted); white-space: nowrap; }
+.intro-foot { display: flex; justify-content: center; }
+.intro-skip {
+  min-height: 44px; padding: 0 var(--s-5); border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, .32); background: transparent;
+  color: var(--c-intro-ink); font: inherit; font-size: var(--t-sm); cursor: pointer;
+  transition: background-color var(--d-fast) var(--e-out);
+}
+@media (hover: hover) { .intro-skip:hover { background: rgba(255, 255, 255, .12); } }
+.intro-skip:focus-visible, .intro-open:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+.intro-open { min-width: 200px; }
+
+/* ───────── Music hint bubble ───────── */
+.float-anchor { position: relative; }
+.music-hint {
+  position: absolute; top: 0; right: calc(100% + var(--s-3));
+  display: flex; align-items: center;
+  background: var(--c-ink); color: #fff; border-radius: 999px;
+  box-shadow: 0 6px 16px rgba(18, 22, 20, .18);
+  font-family: var(--f-body); white-space: nowrap;
+  opacity: 0; transform: translateX(8px);
+  transition: opacity 160ms var(--e-in), transform 160ms var(--e-in);
+}
+.music-hint.is-in { opacity: 1; transform: none; transition: opacity var(--d-base) var(--e-out), transform var(--d-base) var(--e-out); }
+.music-hint::after {
+  content: ""; position: absolute; top: 50%; right: -4px;
+  width: 10px; height: 10px; margin-top: -5px;
+  background: var(--c-ink); transform: rotate(45deg); border-radius: 2px;
+}
+.music-hint-main {
+  display: flex; align-items: center; gap: var(--s-2);
+  min-height: 44px; padding: 0 var(--s-1) 0 var(--s-4);
+  border: 0; background: none; color: inherit; font: inherit; font-size: var(--t-sm); font-weight: 600; cursor: pointer;
+  --od-icon-size: 16px;
+}
+.music-hint-close {
+  width: 44px; height: 44px; display: grid; place-items: center;
+  border: 0; background: none; color: rgba(255, 255, 255, .78); cursor: pointer; border-radius: 50%;
+  --od-icon-size: 14px; position: relative; z-index: 1;
+}
+.music-hint-main:focus-visible, .music-hint-close:focus-visible { outline: 2px solid #fff; outline-offset: -4px; border-radius: 999px; }
+@media (hover: hover) { .music-hint-close:hover { color: #fff; } }
+
+/* ───────── Scroll to top ───────── */
+.scroll-top {
+  position: absolute; z-index: 30;
+  right: var(--s-3); bottom: calc(var(--phone-safe-bottom) + var(--s-4));
+  width: 44px; height: 44px; display: grid; place-items: center;
+  border-radius: 50%; border: 1px solid var(--c-line);
+  background: rgba(255, 255, 255, .94); color: var(--c-ink);
+  box-shadow: 0 4px 12px rgba(18, 22, 20, .12);
+  cursor: pointer; --od-icon-size: 20px;
+  opacity: 0; transform: translateY(8px); visibility: hidden;
+  transition: opacity 160ms var(--e-in), transform 160ms var(--e-in), visibility 0s linear 160ms;
+}
+.scroll-top.is-shown {
+  opacity: 1; transform: none; visibility: visible;
+  transition: opacity var(--d-base) var(--e-out), transform var(--d-base) var(--e-out), visibility 0s;
+}
+.scroll-top:focus-visible { outline: 2px solid var(--c-accent); outline-offset: 2px; }
+@media (hover: hover) { .scroll-top:hover { border-color: var(--c-accent); color: var(--c-accent); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .intro, .intro-sign, .music-hint, .music-hint.is-in, .scroll-top, .scroll-top.is-shown { transition: none; }
+  .intro-caret { animation: none; }
+}
+
+/* ───────── Invitation-link admin (desktop + mobile web, no handset shell) ───────── */
+*, *::before, *::after { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { margin: 0; }
+.admin-body {
+  background: var(--c-bg); color: var(--c-ink);
+  font-family: var(--f-body); font-size: var(--t-md); line-height: 1.6;
+  word-break: keep-all; overflow-wrap: anywhere;
+  -webkit-font-smoothing: antialiased;
+}
+.admin { max-width: 760px; margin: 0 auto; padding: var(--s-7) var(--s-5) var(--s-9); }
+.admin :focus-visible { outline: 2px solid var(--c-accent); outline-offset: 2px; border-radius: var(--r-sm); }
+.admin .od-icon { fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.admin code { font-size: .92em; background: var(--c-accent-soft); padding: 0 var(--s-1); border-radius: 4px; }
+
+.admin-head { margin-bottom: var(--s-6); }
+.admin-head .eyebrow { text-align: left; }
+.admin-title { margin: var(--s-2) 0 0; font-family: var(--f-display); font-size: var(--t-2xl); line-height: 1.3; }
+.admin-sub { margin: var(--s-2) 0 0; color: var(--c-muted); font-size: var(--t-sm); }
+
+.admin-card { background: var(--c-surface); border: 1px solid var(--c-line); border-radius: var(--r-lg); padding: var(--s-5); }
+.admin-card + .admin-card { margin-top: var(--s-4); }
+.admin-h2 { margin: 0 0 var(--s-4); font-size: var(--t-lg); font-weight: 700; line-height: 1.4; }
+.admin-inline { display: flex; flex-wrap: wrap; gap: var(--s-2); margin-top: var(--s-3); }
+
+.admin-add { display: grid; gap: var(--s-4); grid-template-columns: minmax(0, 1fr) minmax(0, 220px) auto; align-items: start; }
+.admin-add-btn { margin-top: 26px; --od-icon-size: 18px; }
+.admin-bulk { margin-top: var(--s-4); border-top: 1px solid var(--c-line); padding-top: var(--s-3); }
+.admin-bulk summary { cursor: pointer; font-weight: 600; font-size: var(--t-sm); min-height: 44px; display: flex; align-items: center; color: var(--c-accent); }
+.admin-bulk-body { display: grid; gap: var(--s-4); margin-top: var(--s-2); }
+
+.admin-list-head { display: flex; justify-content: space-between; align-items: baseline; gap: var(--s-3); flex-wrap: wrap; }
+.admin-list-head .admin-h2 { margin-bottom: 0; }
+.admin-stats { margin: 0; font-size: var(--t-sm); color: var(--c-muted); }
+.admin-toolbar { margin-top: var(--s-4); display: grid; gap: var(--s-4); grid-template-columns: minmax(0, 1fr) minmax(0, 300px); align-items: end; }
+
+.guest-list { list-style: none; margin: var(--s-5) 0 0; padding: 0; border-top: 1px solid var(--c-line); }
+.guest-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--s-3); align-items: center; padding: var(--s-3) 0; border-bottom: 1px solid var(--c-line); }
+.guest-row.is-sent .guest-name-text::after { content: "보냄"; margin-left: var(--s-2); font-size: var(--t-xs); font-weight: 600; color: var(--c-success); }
+.guest-main { min-width: 0; }
+.guest-name-line { display: flex !important; align-items: center; gap: var(--s-2); flex-wrap: wrap; }
+.guest-name-text { font-weight: 700; }
+.side-chip { font-size: var(--t-xs); font-weight: 600; padding: 0 var(--s-2); border-radius: 999px; line-height: 22px; white-space: nowrap; }
+.side-chip.side-0 { background: var(--c-accent-soft); color: var(--c-accent); }
+.side-chip.side-1 { background: var(--c-spring-soft); color: var(--c-spring); }
+.guest-link { font-size: var(--t-sm); color: var(--c-muted) !important; text-decoration: none; }
+@media (hover: hover) { .guest-link:hover { color: var(--c-accent) !important; text-decoration: underline; } }
+.guest-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: var(--s-2); align-items: center; --od-icon-size: 16px; }
+.guest-edit { grid-column: 1 / -1; }
+.guest-row:has(.guest-edit) { grid-template-columns: minmax(0, 1fr); }
+.sent-toggle { display: inline-flex; align-items: center; gap: var(--s-1); min-height: 44px; padding: 0 var(--s-2); font-size: var(--t-sm); cursor: pointer; }
+.sent-toggle input { width: 18px; height: 18px; accent-color: var(--c-accent); }
+.confirm-delete { display: inline-flex; gap: var(--s-2); }
+.btn--danger { background: var(--c-error); border-color: var(--c-error); color: #fff; }
+.btn--ghost-danger { color: var(--c-error); }
+@media (hover: hover) {
+  .btn--danger:hover { background: #8f1e18; border-color: #8f1e18; }
+  .btn--ghost-danger:hover { border-color: var(--c-error); background: #fcefee; }
+}
+
+.admin-empty { margin: var(--s-5) 0 0; padding: var(--s-6) var(--s-4); text-align: center; color: var(--c-muted); font-size: var(--t-sm); border: 1px dashed var(--c-line); border-radius: var(--r-md); }
+.admin-note { margin: var(--s-4) 0 0; font-size: var(--t-xs); color: var(--c-muted); }
+.admin-toast { position: fixed; bottom: var(--s-6); }
+
+/* ───────── Mobile (≤ 767px): one column, touch-sized actions in a fixed grid ───────── */
+@media (max-width: 767px) {
+  .admin { padding: var(--s-6) var(--s-4) calc(var(--s-8) + env(safe-area-inset-bottom)); }
+  .admin-title { font-size: var(--t-xl); }
+  .admin-card { padding: var(--s-4); border-radius: var(--r-md); }
+  .admin-h2 { font-size: var(--t-md); }
+  .admin-add { grid-template-columns: minmax(0, 1fr); gap: var(--s-3); }
+  .admin-add-btn { margin-top: 0; width: 100%; }
+  .admin-toolbar { grid-template-columns: minmax(0, 1fr); gap: var(--s-3); }
+  .admin-inline { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .admin-inline .btn { width: 100%; padding: 0 var(--s-2); }
+  .admin-inline .btn:only-child { grid-column: 1 / -1; }
+
+  .guest-list { margin-top: var(--s-4); }
+  .guest-row { grid-template-columns: minmax(0, 1fr); gap: var(--s-2); padding: var(--s-4) 0; }
+  .guest-actions {
+    display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--s-2);
+    justify-content: stretch;
+  }
+  .guest-actions .btn { width: 100%; padding: 0 var(--s-1); }
+  .sent-toggle { justify-content: center; border: 1px solid var(--c-line); border-radius: var(--r-md); }
+  .confirm-delete { grid-column: span 2; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s-2); }
+  .guest-edit .od-row { flex-wrap: wrap; }
+  .guest-edit .od-row .input { flex-basis: 100%; }
+  .guest-edit .od-row .btn { flex: 1 1 0; }
+
+  .admin-toast { bottom: calc(var(--s-5) + env(safe-area-inset-bottom)); }
+}
+
+  </style>
+</head>
+<body class="admin-body">
+  <svg class="icon-sprite" aria-hidden="true" focusable="false" style="position:absolute;width:0;height:0;overflow:hidden">
+    <symbol id="i-copy" viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2" /><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2" /></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5" /></symbol>
+    <symbol id="i-alert" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" /><path d="M12 7.5v5.5M12 16.5v.01" /></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M6 12h12M12 6v12" /></symbol>
+  </svg>
+
+  <div class="admin">
+    <header class="admin-head">
+      <span class="eyebrow">INVITATION LINKS</span>
+      <h1 class="admin-title">초대 링크 관리</h1>
+      <p class="admin-sub">추연학 ♡ 홍은미 · 2027년 3월 21일 일요일 오후 1시 30분</p>
+    </header>
+
+    <section class="admin-card" aria-labelledby="h-base">
+      <h2 class="admin-h2" id="h-base">청첩장 주소</h2>
+      <div class="field od-field">
+        <label for="base-url">링크의 기본 주소</label>
+        <input id="base-url" class="input" inputmode="url" aria-describedby="base-help" />
+        <span class="field-help" id="base-help">청첩장을 올린 실제 주소로 바꿔 주세요. 이름은 주소 끝에 <code>?to=이름</code>으로 붙습니다.</span>
+      </div>
+      <div class="admin-inline">
+        <button type="button" class="btn btn--sm" id="base-reset">지금 주소로 되돌리기</button>
+      </div>
+    </section>
+
+    <section class="admin-card" aria-labelledby="h-add">
+      <h2 class="admin-h2" id="h-add">받는 분 추가</h2>
+      <form class="admin-add" id="add-form" novalidate>
+        <div class="field od-field" id="new-name-field">
+          <label for="new-name">이름<span class="req" aria-hidden="true">*</span></label>
+          <input id="new-name" class="input" maxlength="20" autocomplete="off" aria-describedby="new-name-err" />
+          <span class="field-error" id="new-name-err" hidden><svg class="od-icon" aria-hidden="true"><use href="#i-alert" /></svg><span id="new-name-msg"></span></span>
+        </div>
+        <fieldset class="field od-field">
+          <legend>구분</legend>
+          <div class="seg">
+            <input type="radio" name="new-side" id="new-side-0" value="신랑측" checked /><label for="new-side-0">신랑측</label>
+            <input type="radio" name="new-side" id="new-side-1" value="신부측" /><label for="new-side-1">신부측</label>
+          </div>
+        </fieldset>
+        <button type="submit" class="btn btn--primary admin-add-btn"><svg class="od-icon" aria-hidden="true"><use href="#i-plus" /></svg> 추가</button>
+      </form>
+
+      <details class="admin-bulk">
+        <summary>여러 명 한 번에 추가</summary>
+        <div class="admin-bulk-body">
+          <div class="field od-field">
+            <label for="bulk-names">이름 목록</label>
+            <textarea id="bulk-names" class="textarea" rows="5" aria-describedby="bulk-help"></textarea>
+            <span class="field-help" id="bulk-help">한 줄에 한 명씩, 또는 쉼표로 구분해 붙여넣으세요. 이미 있는 이름은 건너뜁니다.</span>
+          </div>
+          <fieldset class="field od-field">
+            <legend>구분</legend>
+            <div class="seg">
+              <input type="radio" name="bulk-side" id="bulk-side-0" value="신랑측" checked /><label for="bulk-side-0">신랑측</label>
+              <input type="radio" name="bulk-side" id="bulk-side-1" value="신부측" /><label for="bulk-side-1">신부측</label>
+            </div>
+          </fieldset>
+          <button type="button" class="btn btn--block" id="bulk-add">목록에 추가</button>
+        </div>
+      </details>
+    </section>
+
+    <section class="admin-card" aria-labelledby="h-list">
+      <div class="admin-list-head">
+        <h2 class="admin-h2" id="h-list">초대 목록</h2>
+        <p class="admin-stats" id="stats"></p>
+      </div>
+      <div class="admin-toolbar">
+        <div class="field od-field admin-search">
+          <label for="search">이름 검색</label>
+          <input id="search" class="input" type="search" />
+        </div>
+        <fieldset class="field od-field">
+          <legend>보기</legend>
+          <div class="seg" style="--seg-cols: 3">
+            <input type="radio" name="filter" id="filter-0" value="전체" checked /><label for="filter-0">전체</label>
+            <input type="radio" name="filter" id="filter-1" value="신랑측" /><label for="filter-1">신랑측</label>
+            <input type="radio" name="filter" id="filter-2" value="신부측" /><label for="filter-2">신부측</label>
+          </div>
+        </fieldset>
+      </div>
+      <div class="admin-inline">
+        <button type="button" class="btn btn--sm" id="copy-all"><svg class="od-icon" aria-hidden="true"><use href="#i-copy" /></svg> 보이는 링크 모두 복사</button>
+        <button type="button" class="btn btn--sm" id="export-csv">CSV 내려받기</button>
+      </div>
+      <p class="admin-empty" id="empty" hidden></p>
+      <ul class="guest-list" id="list"></ul>
+    </section>
+
+    <p class="admin-note">목록은 지금 쓰는 브라우저에만 저장됩니다. 다른 기기에서 쓰려면 CSV로 내려받아 두세요.</p>
+  </div>
+
+  <div class="toast admin-toast" id="toast" role="status" aria-live="polite">
+    <svg class="od-icon" aria-hidden="true"><use href="#i-check" /></svg><span id="toast-msg"></span>
+  </div>
+
+  <script>
+  (() => {
+    const GUESTS_KEY = "inv-admin-guests";
+    const BASE_KEY = "inv-admin-base";
+    const SIDES = ["신랑측", "신부측"];
+    const NAME_MAX = 20;
+    const DUP_MSG = '이미 목록에 있는 이름이에요. 구분이 필요하면 "홍길동(회사)"처럼 적어 주세요.';
+
+    const $ = (s, r = document) => r.querySelector(s);
+    const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+    const icon = (id) => `<svg class="od-icon" aria-hidden="true"><use href="#i-${id}" /></svg>`;
+    const cleanName = (raw) => Array.from(String(raw).replace(/\s+/g, " ").trim()).slice(0, NAME_MAX).join("");
+    const newId = () => `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 7)}`;
+
+    /* The invitation sits next to this page: http(s) → folder URL, file:// → its index.html */
+    function defaultBase() {
+      const dir = location.href.split(/[?#]/)[0].replace(/[^/]*$/, "");
+      return location.protocol === "file:" ? `${dir}index.html` : dir;
+    }
+    function buildLink(base, name) {
+      const b = base.trim();
+      if (!b) return `?to=${encodeURIComponent(name)}`;
+      const [noHash, hash] = b.split("#");
+      const sep = noHash.includes("?") ? (/[?&]$/.test(noHash) ? "" : "&") : "?";
+      return `${noHash}${sep}to=${encodeURIComponent(name)}${hash ? `#${hash}` : ""}`;
+    }
+    async function copyText(text) {
+      try { await navigator.clipboard.writeText(text); return true; }
+      catch {
+        const ta = document.createElement("textarea");
+        ta.value = text; ta.setAttribute("readonly", ""); ta.style.position = "fixed"; ta.style.opacity = "0";
+        document.body.appendChild(ta); ta.select();
+        let ok = false; try { ok = document.execCommand("copy"); } catch {}
+        ta.remove(); return ok;
+      }
+    }
+    let toastTimer;
+    function toast(msg) {
+      $("#toast-msg").textContent = msg;
+      $("#toast").classList.add("is-shown");
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => $("#toast").classList.remove("is-shown"), 2200);
+    }
+
+    const state = {
+      guests: (() => { try { const s = JSON.parse(localStorage.getItem(GUESTS_KEY)); return Array.isArray(s) ? s : []; } catch { return []; } })(),
+      base: (() => { try { return localStorage.getItem(BASE_KEY) || defaultBase(); } catch { return defaultBase(); } })(),
+      query: "",
+      filter: "전체",
+      editing: null,
+      editError: "",
+      confirming: null,
+    };
+    const save = () => { try { localStorage.setItem(GUESTS_KEY, JSON.stringify(state.guests)); } catch {} };
+    const isDuplicate = (n, exceptId) => state.guests.some((g) => g.name === n && g.id !== exceptId);
+    const visible = () => {
+      const q = state.query.trim();
+      return state.guests.filter((g) => (state.filter === "전체" || g.side === state.filter) && (!q || g.name.includes(q)));
+    };
+
+    function render() {
+      const vis = visible();
+      const sent = state.guests.filter((g) => g.sent).length;
+      $("#stats").innerHTML = `<span class="od-nowrap">총 ${state.guests.length}명</span> · <span class="od-nowrap">보냄 ${sent}명</span>`;
+      $("#copy-all").disabled = !vis.length;
+      $("#export-csv").disabled = !vis.length;
+      const empty = $("#empty");
+      if (!state.guests.length) {
+        empty.innerHTML = "아직 받는 분이 없어요.<br />위에서 이름을 추가하면 그 사람만의 초대 링크가 만들어집니다.";
+        empty.hidden = false;
+      } else if (!vis.length) {
+        empty.textContent = "조건에 맞는 분이 없어요. 검색어나 보기 설정을 바꿔 보세요.";
+        empty.hidden = false;
+      } else {
+        empty.hidden = true;
+      }
+      $("#list").hidden = !vis.length;
+      $("#list").innerHTML = vis.map((g) => {
+        const link = buildLink(state.base, g.name);
+        const n = esc(g.name);
+        if (state.editing === g.id) {
+          return `<li class="guest-row" data-id="${g.id}">
+            <div class="guest-main">
+              <div class="field od-field guest-edit${state.editError ? " is-invalid" : ""}">
+                <label for="edit-${g.id}">이름 수정</label>
+                <div class="od-row">
+                  <input id="edit-${g.id}" class="input od-fill" maxlength="${NAME_MAX}" value="${n}" aria-invalid="${!!state.editError}" aria-describedby="edit-err-${g.id}" data-edit-input />
+                  <button type="button" class="btn btn--sm btn--primary od-fixed" data-act="save">저장</button>
+                  <button type="button" class="btn btn--sm od-fixed" data-act="cancel-edit">취소</button>
+                </div>
+                <span class="field-error" id="edit-err-${g.id}"${state.editError ? "" : " hidden"}>${icon("alert")}<span>${esc(state.editError)}</span></span>
+              </div>
+            </div>
+          </li>`;
+        }
+        const del = state.confirming === g.id
+          ? `<span class="confirm-delete" role="group" aria-label="${n} 삭제 확인">
+               <button type="button" class="btn btn--sm btn--danger" data-act="delete">삭제</button>
+               <button type="button" class="btn btn--sm" data-act="cancel-delete">취소</button>
+             </span>`
+          : `<button type="button" class="btn btn--sm btn--ghost-danger" data-act="confirm" aria-label="${n} 삭제">삭제</button>`;
+        return `<li class="guest-row${g.sent ? " is-sent" : ""}" data-id="${g.id}">
+          <div class="guest-main">
+            <div class="od-field">
+              <span class="guest-name-line">
+                <span class="guest-name-text">${n}</span>
+                <span class="side-chip side-${SIDES.indexOf(g.side)}">${esc(g.side)}</span>
+              </span>
+              <a class="guest-link od-truncate" href="${esc(link)}" target="_blank" rel="noopener noreferrer" title="${esc(link)}">${esc(link)}</a>
+            </div>
+          </div>
+          <div class="guest-actions">
+            <label class="sent-toggle"><input type="checkbox" data-act="sent"${g.sent ? " checked" : ""} /><span>보냄</span></label>
+            <button type="button" class="btn btn--sm" data-act="copy" aria-label="${n} 링크 복사">${icon("copy")} 복사</button>
+            <a class="btn btn--sm" href="${esc(link)}" target="_blank" rel="noopener noreferrer" aria-label="${n} 청첩장 미리보기 (새 탭)">미리보기</a>
+            <button type="button" class="btn btn--sm" data-act="edit" aria-label="${n} 이름 수정">수정</button>
+            ${del}
+          </div>
+        </li>`;
+      }).join("");
+      if (state.editing) {
+        const input = $("[data-edit-input]");
+        if (input) { input.focus(); input.setSelectionRange(input.value.length, input.value.length); }
+      }
+    }
+
+    /* base url */
+    const baseInput = $("#base-url");
+    baseInput.value = state.base;
+    baseInput.addEventListener("input", () => {
+      state.base = baseInput.value;
+      try { localStorage.setItem(BASE_KEY, state.base); } catch {}
+      render();
+    });
+    $("#base-reset").addEventListener("click", () => {
+      state.base = defaultBase();
+      baseInput.value = state.base;
+      try { localStorage.setItem(BASE_KEY, state.base); } catch {}
+      render();
+    });
+
+    /* add one */
+    function setNameError(msg) {
+      $("#new-name-field").classList.toggle("is-invalid", !!msg);
+      $("#new-name").setAttribute("aria-invalid", String(!!msg));
+      $("#new-name-msg").textContent = msg;
+      $("#new-name-err").hidden = !msg;
+    }
+    $("#new-name").addEventListener("blur", (e) => { if (cleanName(e.target.value) && $("#new-name-field").classList.contains("is-invalid")) setNameError(""); });
+    $("#add-form").addEventListener("submit", (e) => {
+      e.preventDefault();
+      const n = cleanName($("#new-name").value);
+      if (!n) { setNameError("받는 분 이름을 입력해 주세요."); $("#new-name").focus(); return; }
+      if (isDuplicate(n)) { setNameError(DUP_MSG); $("#new-name").focus(); return; }
+      const side = $('input[name="new-side"]:checked').value;
+      state.guests.unshift({ id: newId(), name: n, side, sent: false, createdAt: new Date().toISOString() });
+      save();
+      $("#new-name").value = "";
+      setNameError("");
+      render();
+      toast(`${n} 님을 추가했어요`);
+    });
+
+    /* add many */
+    $("#bulk-add").addEventListener("click", () => {
+      const names = $("#bulk-names").value.split(/[\n,]/).map(cleanName).filter(Boolean);
+      const side = $('input[name="bulk-side"]:checked').value;
+      const seen = new Set(state.guests.map((g) => g.name));
+      const fresh = [];
+      let skipped = 0;
+      names.forEach((n) => {
+        if (seen.has(n)) { skipped += 1; return; }
+        seen.add(n);
+        fresh.push({ id: newId(), name: n, side, sent: false, createdAt: new Date().toISOString() });
+      });
+      if (!fresh.length) { toast(skipped ? "모두 이미 목록에 있는 이름이에요" : "추가할 이름이 없어요"); return; }
+      state.guests = [...fresh.reverse(), ...state.guests];
+      save();
+      $("#bulk-names").value = "";
+      render();
+      toast(`${fresh.length}명을 추가했어요${skipped ? ` (중복 ${skipped}명 제외)` : ""}`);
+    });
+
+    /* search + filter */
+    $("#search").addEventListener("input", (e) => { state.query = e.target.value; render(); });
+    document.querySelectorAll('input[name="filter"]').forEach((r) => r.addEventListener("change", () => { state.filter = r.value; render(); }));
+
+    /* bulk actions */
+    $("#copy-all").addEventListener("click", async () => {
+      const vis = visible();
+      if (!vis.length) return;
+      const ok = await copyText(vis.map((g) => `${g.name}\t${buildLink(state.base, g.name)}`).join("\n"));
+      toast(ok ? `링크 ${vis.length}개를 복사했어요` : "복사하지 못했어요");
+    });
+    $("#export-csv").addEventListener("click", () => {
+      const vis = visible();
+      if (!vis.length) return;
+      const cell = (v) => `"${String(v).replace(/"/g, '""')}"`;
+      const rows = [["이름", "구분", "초대 링크", "보냄"], ...vis.map((g) => [g.name, g.side, buildLink(state.base, g.name), g.sent ? "O" : ""])];
+      const csv = "﻿" + rows.map((r) => r.map(cell).join(",")).join("\r\n");
+      const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
+      const a = document.createElement("a");
+      a.href = url; a.download = "초대링크_연학_은미.csv";
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    });
+
+    /* row actions */
+    function saveEdit(id) {
+      const input = $("[data-edit-input]");
+      const n = cleanName(input ? input.value : "");
+      if (!n) { state.editError = "이름을 입력해 주세요."; render(); return; }
+      if (isDuplicate(n, id)) { state.editError = DUP_MSG; render(); return; }
+      state.guests = state.guests.map((g) => (g.id === id ? { ...g, name: n } : g));
+      state.editing = null; state.editError = "";
+      save(); render();
+      const row = document.querySelector(`[data-id="${id}"] [data-act="edit"]`);
+      if (row) row.focus();
+    }
+    $("#list").addEventListener("click", async (e) => {
+      const el = e.target.closest("[data-act]");
+      if (!el) return;
+      const id = el.closest("[data-id]").dataset.id;
+      const g = state.guests.find((x) => x.id === id);
+      if (!g) return;
+      const act = el.dataset.act;
+      if (act === "copy") {
+        toast((await copyText(buildLink(state.base, g.name))) ? `${g.name} 님 링크를 복사했어요` : "복사하지 못했어요. 링크를 길게 눌러 복사해 주세요");
+      } else if (act === "edit") {
+        state.editing = id; state.editError = ""; state.confirming = null; render();
+      } else if (act === "save") {
+        saveEdit(id);
+      } else if (act === "cancel-edit") {
+        state.editing = null; state.editError = ""; render();
+        const b = document.querySelector(`[data-id="${id}"] [data-act="edit"]`); if (b) b.focus();
+      } else if (act === "confirm") {
+        state.confirming = id; render();
+        const b = document.querySelector(`[data-id="${id}"] [data-act="cancel-delete"]`); if (b) b.focus();
+      } else if (act === "cancel-delete") {
+        state.confirming = null; render();
+        const b = document.querySelector(`[data-id="${id}"] [data-act="confirm"]`); if (b) b.focus();
+      } else if (act === "delete") {
+        state.guests = state.guests.filter((x) => x.id !== id);
+        state.confirming = null; save(); render();
+        toast(`${g.name} 님을 삭제했어요`);
+      }
+    });
+    $("#list").addEventListener("change", (e) => {
+      if (e.target.dataset.act !== "sent") return;
+      const id = e.target.closest("[data-id]").dataset.id;
+      state.guests = state.guests.map((g) => (g.id === id ? { ...g, sent: e.target.checked } : g));
+      save(); render();
+      const cb = document.querySelector(`[data-id="${id}"] [data-act="sent"]`); if (cb) cb.focus();
+    });
+    $("#list").addEventListener("keydown", (e) => {
+      if (!e.target.matches("[data-edit-input]")) return;
+      const id = e.target.closest("[data-id]").dataset.id;
+      if (e.key === "Enter") { e.preventDefault(); saveEdit(id); }
+      if (e.key === "Escape") { state.editing = null; state.editError = ""; render(); }
+    });
+
+    render();
+  })();
+  </script>
+</body>
+</html>
