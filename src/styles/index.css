@@ -25,7 +25,7 @@
   --color-error-strong: #8f1e18;
   --color-error-soft: #fcefee;
   --color-success: #2f6b4a;
-  --color-scrim: rgb(28 25 23 / .48);
+  --color-scrim: rgb(28 25 23 / 0.48);
   --color-intro-bg: #2b2826;
   --color-intro-ink: #f8f7f6;
   --color-intro-muted: #cfc8c4;
@@ -36,22 +36,31 @@
   --font-body: "Pretendard", "Apple SD Gothic Neo", system-ui, sans-serif;
   --font-sans: var(--font-body);
 
-  --text-xs: 12px;   --text-xs--line-height: 1.6;
-  --text-sm: 14px;   --text-sm--line-height: 1.7;
-  --text-md: 16px;   --text-md--line-height: 1.7;
-  --text-poem: 17px; --text-poem--line-height: 2;
-  --text-lg: 20px;   --text-lg--line-height: 1.4;
-  --text-intro: 22px; --text-intro--line-height: 1.6;
-  --text-xl: 24px;   --text-xl--line-height: 1.4;
-  --text-names: 28px; --text-names--line-height: 1.3;
-  --text-2xl: 32px;  --text-2xl--line-height: 1.3;
+  --text-xs: 12px;
+  --text-xs--line-height: 1.6;
+  --text-sm: 14px;
+  --text-sm--line-height: 1.7;
+  --text-md: 16px;
+  --text-md--line-height: 1.7;
+  --text-poem: 17px;
+  --text-poem--line-height: 2;
+  --text-lg: 20px;
+  --text-lg--line-height: 1.4;
+  --text-intro: 22px;
+  --text-intro--line-height: 1.6;
+  --text-xl: 24px;
+  --text-xl--line-height: 1.4;
+  --text-names: 28px;
+  --text-names--line-height: 1.3;
+  --text-2xl: 32px;
+  --text-2xl--line-height: 1.3;
 
   --radius-sm: 8px;
   --radius-md: 12px;
   --radius-lg: 20px;
 
-  --ease-out-soft: cubic-bezier(.2, .7, .2, 1);
-  --ease-in-soft: cubic-bezier(.5, 0, .75, 0);
+  --ease-out-soft: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --ease-in-soft: cubic-bezier(0.5, 0, 0.75, 0);
 
   --animate-caret: caret 1s steps(1) infinite;
   --animate-eq: eq 900ms ease-in-out infinite alternate;
@@ -61,17 +70,62 @@
   --animate-wave-drift-b: wave-drift 16s linear infinite reverse;
   --animate-wave-drift-c: wave-drift 30s linear infinite;
 
-  @keyframes caret { 50% { opacity: 0; } }
-  @keyframes eq { from { transform: scaleY(.3); } to { transform: scaleY(1); } }
-  @keyframes wave-drift { from { transform: translateX(0); } to { transform: translateX(var(--wave-shift)); } }
+  @keyframes caret {
+    50% {
+      opacity: 0;
+    }
+  }
+  @keyframes eq {
+    from {
+      transform: scaleY(0.3);
+    }
+    to {
+      transform: scaleY(1);
+    }
+  }
+  @keyframes wave-drift {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(var(--wave-shift));
+    }
+  }
 }
 
 @layer base {
-  html { -webkit-font-smoothing: antialiased; }
+  html {
+    -webkit-font-smoothing: antialiased;
+  }
   /* one visible focus ring for every keyboard-operable control */
-  :focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; }
+  :focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
 }
 
 /* Handset chrome tweak while a dark overlay (intro, lightbox) covers the screen */
-.phone-screen.is-dark-overlay .status-bar { background: none; color: #fff; }
-.phone-screen.is-dark-overlay .gesture-indicator { background: #fff; }
+.phone-screen.is-dark-overlay .status-bar {
+  background: none;
+  color: #fff;
+}
+.phone-screen.is-dark-overlay .gesture-indicator {
+  background: #fff;
+}
+
+#root {
+  display: contents;
+} /* 중간 상자를 레이아웃에서 빼서 원래 구조처럼 동작 */
+@media screen and (max-width: 480px) {
+  .status-bar,
+  .camera-dot,
+  .gesture-indicator {
+    display: none;
+  }
+  .phone-content {
+    padding: 0;
+  }
+  html body {
+    place-items: normal;
+  } /* 휴대폰 화면에서는 가운데 정렬 해제 */
+}

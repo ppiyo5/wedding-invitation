@@ -213,12 +213,6 @@ export const PHOTOS: Photo[] = [
     alt: "웨딩 사진 2",
   },
   {
-    src: "photos/03.jpeg",
-    w: 1080,
-    h: 720,
-    alt: "웨딩 사진 3",
-  },
-  {
     src: "photos/04.jpeg",
     w: 1080,
     h: 720,
@@ -395,17 +389,17 @@ export const CONTACTS: ContactGroup[] = [
   {
     side: "신랑측",
     people: [
-      { rel: "신랑", name: g.name, tel: "010-0000-0001" },
-      { rel: "신랑 아버지", name: g.father, tel: "010-0000-0002" },
-      { rel: "신랑 어머니", name: g.mother, tel: "010-0000-0003" },
+      { rel: "신랑", name: g.name, tel: "010-8341-1171" },
+      { rel: "신랑 아버지", name: g.father, tel: "010-4676-2926" },
+      { rel: "신랑 어머니", name: g.mother, tel: "" },
     ],
   },
   {
     side: "신부측",
     people: [
-      { rel: "신부", name: b.name, tel: "010-0000-0004" },
-      { rel: "신부 아버지", name: b.father, tel: "010-0000-0005" },
-      { rel: "신부 어머니", name: b.mother, tel: "010-0000-0006" },
+      { rel: "신부", name: b.name, tel: "010-5427-8023" },
+      { rel: "신부 아버지", name: b.father, tel: "010-9170-5110" },
+      { rel: "신부 어머니", name: b.mother, tel: "010-4663-3498" },
     ],
   },
 ];
@@ -416,18 +410,18 @@ export const ACCOUNTS: AccountGroup[] = [
     rows: [
       {
         holder: `신랑 ${g.name}`,
-        bank: "국민은행",
-        number: "000000-00-000001",
+        bank: "신한은행",
+        number: "110-399-647173",
       },
       {
         holder: g.father ? `아버지 ${g.father}` : "",
         bank: "신한은행",
-        number: "000-000-000002",
+        number: "110-274-076270",
       },
       {
         holder: g.mother ? `어머니 ${g.mother}` : "",
         bank: "우리은행",
-        number: "0000-000-000003",
+        number: "",
       },
     ],
   },
@@ -436,18 +430,18 @@ export const ACCOUNTS: AccountGroup[] = [
     rows: [
       {
         holder: `신부 ${b.name}`,
-        bank: "카카오뱅크",
-        number: "0000-00-0000004",
+        bank: "신협",
+        number: "134-002-725598",
       },
       {
         holder: b.father ? `아버지 ${b.father}` : "",
-        bank: "하나은행",
-        number: "000-000000-00005",
+        bank: "농협은행",
+        number: "241022-56-031016",
       },
       {
         holder: b.mother ? `어머니 ${b.mother}` : "",
-        bank: "농협은행",
-        number: "000-0000-0000-06",
+        bank: "신협",
+        number: "142-002-744893",
       },
     ],
   },
