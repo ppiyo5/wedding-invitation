@@ -117,12 +117,12 @@
   display: contents;
 } /* 중간 상자를 레이아웃에서 빼서 원래 구조처럼 동작 */
 @media screen and (max-width: 480px) {
-  .status-bar,
-  .camera-dot,
-  .gesture-indicator {
+  .phone-screen .status-bar,
+  .phone-screen .camera-dot,
+  .phone-screen .gesture-indicator {
     display: none;
   }
-  .phone-content {
+  .phone-screen .phone-content {
     padding: 0;
   }
   html body {

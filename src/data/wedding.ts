@@ -213,6 +213,12 @@ export const PHOTOS: Photo[] = [
     alt: "웨딩 사진 2",
   },
   {
+    src: "photos/03.jpeg",
+    w: 1080,
+    h: 720,
+    alt: "웨딩 사진 3",
+  },
+  {
     src: "photos/04.jpeg",
     w: 1080,
     h: 720,
@@ -237,7 +243,7 @@ export const PHOTOS: Photo[] = [
     alt: "웨딩 사진 6",
   },
   {
-    src: "photos/08.jpeg",
+    src: "photos/08.png",
     w: 1080,
     h: 720,
     alt: "웨딩 사진 8",
@@ -267,7 +273,7 @@ export const PHOTOS: Photo[] = [
     alt: "웨딩 사진 12",
   },
   {
-    src: "photos/13.png",
+    src: "photos/13.jpeg",
     w: 1080,
     h: 720,
     alt: "웨딩 사진 13",
@@ -320,66 +326,6 @@ export const PHOTOS: Photo[] = [
     h: 720,
     alt: "웨딩 사진 21",
   },
-  {
-    src: "photos/22.jpeg",
-    w: 1080,
-    h: 720,
-    alt: "웨딩 사진 22",
-  },
-  {
-    src: "photos/23.jpeg",
-    w: 1080,
-    h: 720,
-    alt: "웨딩 사진 23",
-  },
-  {
-    src: "photos/24.jpeg",
-    w: 1080,
-    h: 720,
-    alt: "웨딩 사진 24",
-  },
-  {
-    src: "photos/25.jpeg",
-    w: 1080,
-    h: 720,
-    alt: "웨딩 사진 25",
-  },
-  {
-    src: "photos/26.jpeg",
-    w: 1080,
-    h: 720,
-    alt: "웨딩 사진 26",
-  },
-  {
-    src: "photos/27.jpeg",
-    w: 1080,
-    h: 720,
-    alt: "웨딩 사진 27",
-  },
-  {
-    src: "photos/28.jpeg",
-    w: 1080,
-    h: 720,
-    alt: "웨딩 사진 28",
-  },
-  {
-    src: "photos/29.jpeg",
-    w: 1080,
-    h: 720,
-    alt: "웨딩 사진 29",
-  },
-  {
-    src: "photos/30.jpeg",
-    w: 1080,
-    h: 720,
-    alt: "웨딩 사진 30",
-  },
-  {
-    src: "photos/31.jpeg",
-    w: 1080,
-    h: 720,
-    alt: "웨딩 사진 31",
-  },
 ];
 
 /* Names come from WEDDING; a parent left blank there drops out of this list too. */
@@ -410,17 +356,17 @@ export const ACCOUNTS: AccountGroup[] = [
     rows: [
       {
         holder: `신랑 ${g.name}`,
-        bank: "신한은행",
+        bank: "신한",
         number: "110-399-647173",
       },
       {
         holder: g.father ? `아버지 ${g.father}` : "",
-        bank: "신한은행",
+        bank: "신한",
         number: "110-274-076270",
       },
       {
         holder: g.mother ? `어머니 ${g.mother}` : "",
-        bank: "우리은행",
+        bank: "우리",
         number: "",
       },
     ],
@@ -435,7 +381,7 @@ export const ACCOUNTS: AccountGroup[] = [
       },
       {
         holder: b.father ? `아버지 ${b.father}` : "",
-        bank: "농협은행",
+        bank: "농협",
         number: "241022-56-031016",
       },
       {
